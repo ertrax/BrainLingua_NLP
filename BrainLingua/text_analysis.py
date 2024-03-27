@@ -1,4 +1,4 @@
-from tkinter import Text, Button, messagebox, ttk
+from tkinter import Text, Button, ttk
 import tkinter as tk
 from nltk.tokenize import word_tokenize
 import nltk
@@ -16,6 +16,12 @@ mapeo_etiquetas_espanol_ingles = {
     'Preposición': 'IN',
     'Adjetivo': 'JJ'
 }
+
+# Define caja_texto, boton_analizar, boton_limpiar_busqueda y tabla como atributos globales
+caja_texto = None
+boton_analizar = None
+boton_limpiar_busqueda = None
+tabla = None
 
 def contar_palabras_texto(texto):
     tokens = [token for token in word_tokenize(texto) if re.match(r'^\w+$', token)]
@@ -43,8 +49,27 @@ def limpiar_tabla():
     for item in tabla.get_children():
         tabla.delete(item)
 
-# Caja de texto
-caja_texto = Text
-boton_analizar = Button
-boton_limpiar_busqueda = Button
-tabla = ttk.Treeview
+# Crea la interfaz de usuario para el análisis de texto
+def crear_interfaz_texto(ventana):
+    global caja_texto, boton_analizar, boton_limpiar_busqueda, tabla
+    # Caja de texto
+    caja_texto = Text(ventana, height=10, width=50)
+    caja_texto.pack()
+
+    # Botón para analizar texto
+    boton_analizar = Button(ventana, text="Analizar Texto", command=analizar_texto)
+    boton_analizar.pack()
+
+    # Botón para limpiar la búsqueda
+    boton_limpiar_busqueda = Button(ventana, text="Limpiar Búsqueda", command=limpiar_tabla)
+    boton_limpiar_busqueda.pack()
+
+    # Creamos el Treeview para mostrar la tabla
+    tabla = ttk.Treeview(ventana)
+    tabla["columns"] = ("Atributo", "Valor")
+    tabla.column("#0", width=0, stretch=tk.NO)  # Columna invisible
+    tabla.column("Atributo", anchor=tk.W, width=150)
+    tabla.column("Valor", anchor=tk.CENTER, width=150)  # Alineación al centro
+    tabla.heading("Atributo", text="Atributo")
+    tabla.heading("Valor", text="Valor")
+    tabla.pack()

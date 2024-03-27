@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from menu_functions import configurar_menu
-from text_analysis import caja_texto, boton_analizar, boton_limpiar_busqueda, tabla
+from text_analysis import crear_interfaz_texto
 from styles import configurar_estilos
 
 def main():
@@ -18,6 +18,9 @@ def main():
 
     # Configurar el tamaño de la ventana al tamaño máximo de la pantalla
     ventana.geometry(f"{ancho_pantalla}x{alto_pantalla}")
+
+    # Crear la interfaz de análisis de texto
+    crear_interfaz_texto(ventana)
 
     ventana.mainloop()
 
