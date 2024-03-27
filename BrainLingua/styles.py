@@ -6,4 +6,5 @@ def configurar_estilos():
     style.configure('Treeview', background='#ffffff', fieldbackground='#ffffff', foreground='#000000', font=('Helvetica', 10))
     style.map('Treeview', background=[('selected', '#0078d7')])
     style.configure('Treeview.Heading', font=('Helvetica', 10, 'bold'))
-    style.configure('Treeview', rowheight=25)
+    style.configure('Treeview', rowheight=30)  # Ajusta la altura de las filas aquí
+
