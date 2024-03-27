@@ -1,4 +1,4 @@
-from tkinter import Text, Button, ttk
+from tkinter import Text, Button, messagebox, ttk
 import tkinter as tk
 from nltk.tokenize import word_tokenize
 import nltk
@@ -9,6 +9,13 @@ from collections import Counter
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
+
+
+caja_texto = None  # Define caja_texto como una variable global y asigna None
+
+tabla = None  # Define tabla como una variable global y asigna None
+
+# Diccionario de mapeo de etiquetas gramaticales
 mapeo_etiquetas_espanol_ingles = {
     'Sustantivo': 'NN',
     'Sustantivo propio': 'NNP',
@@ -17,11 +24,8 @@ mapeo_etiquetas_espanol_ingles = {
     'Adjetivo': 'JJ'
 }
 
-# Define caja_texto, boton_analizar, boton_limpiar_busqueda y tabla como atributos globales
-caja_texto = None
-boton_analizar = None
-boton_limpiar_busqueda = None
-tabla = None
+# Lista de atributos predefinidos
+atributos_predefinidos = ["Número de palabras", "Sustantivos", "Sustantivos propios", "Conjunciones de coordinación", "Preposiciones", "Adjetivos"]
 
 def contar_palabras_texto(texto):
     tokens = [token for token in word_tokenize(texto) if re.match(r'^\w+$', token)]
@@ -36,20 +40,30 @@ def etiquetar_gramaticalmente_texto(mensaje):
     conteo_etiquetas = Counter(tag for word, tag in tagged_tokens_ingles)
     return conteo_etiquetas
 
-def analizar_texto():
-    texto = caja_texto.get("1.0", "end-1c")
+def obtener_valores_atributos(texto):
     conteo_palabras = contar_palabras_texto(texto)
     etiquetas_gramaticales = etiquetar_gramaticalmente_texto(texto)
+    valores_atributos = {
+        "Número de palabras": conteo_palabras,
+        "Sustantivos": etiquetas_gramaticales.get("NN", 0),
+        "Sustantivos propios": etiquetas_gramaticales.get("NNP", 0),
+        "Conjunciones de coordinación": etiquetas_gramaticales.get("CC", 0),
+        "Preposiciones": etiquetas_gramaticales.get("IN", 0),
+        "Adjetivos": etiquetas_gramaticales.get("JJ", 0)
+    }
+    return valores_atributos
+
+def analizar_texto():
+    texto = caja_texto.get("1.0", "end-1c")
+    valores_atributos = obtener_valores_atributos(texto)
     limpiar_tabla()
-    tabla.insert("", "end", values=("Número de palabras", conteo_palabras))
-    for etiqueta, frecuencia in etiquetas_gramaticales.items():
-        tabla.insert("", "end", values=(etiqueta, frecuencia))
+    for atributo, valor in valores_atributos.items():
+        tabla.insert("", "end", values=(atributo, valor))
 
 def limpiar_tabla():
     for item in tabla.get_children():
         tabla.delete(item)
 
-# Crea la interfaz de usuario para el análisis de texto
 def crear_interfaz_texto(ventana):
     global caja_texto, boton_analizar, boton_limpiar_busqueda, tabla
     # Caja de texto
@@ -68,8 +82,20 @@ def crear_interfaz_texto(ventana):
     tabla = ttk.Treeview(ventana)
     tabla["columns"] = ("Atributo", "Valor")
     tabla.column("#0", width=0, stretch=tk.NO)  # Columna invisible
-    tabla.column("Atributo", anchor=tk.W, width=150)
-    tabla.column("Valor", anchor=tk.CENTER, width=150)  # Alineación al centro
+    tabla.column("Atributo", anchor=tk.W, width=200)
+    tabla.column("Valor", anchor=tk.CENTER, width=200)  # Alineación al centro
     tabla.heading("Atributo", text="Atributo")
     tabla.heading("Valor", text="Valor")
     tabla.pack()
+
+    # Insertar atributos predefinidos en la tabla
+    for atributo in atributos_predefinidos:
+        tabla.insert("", "end", values=(atributo, ""))
+
+
+# Llamada a la función para crear la interfaz
+if __name__ == "__main__":
+    ventana = tk.Tk()
+    ventana.title("BrainLingua NLP")
+    crear_interfaz_texto(ventana)
+    ventana.mainloop()
