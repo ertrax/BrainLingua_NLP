@@ -6,64 +6,14 @@ import re
 from nltk import pos_tag
 from collections import Counter
 from nltk.tokenize import sent_tokenize
+from palabras_malsonantes import palabras_malsonantes  # Importa la lista de palabras malsonantes
+from negaciones import negaciones  # Importa la lista de palabras malsonantes
 
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
-palabras_malsonantes = [
-    "Abuso", "Acojonar", "Afollonada", "Afollonado", "Agilipollada", "Agilipollado", "Agilipollar", "Alamierda", 
-    "Amamonada", "Amamonado", "Amargada", "Amargado", "Anárquico", "Anormal", "Asesina", "Asesinar", "Asesino", 
-    "Asquerosa", "Asqueroso", "Autoritaria", "Autoritario", "Autoritarismo", "Badajo", "Bastarda", "Bastardo", 
-    "Basura", "Berzas", "Berzotas", "Bestia", "Boba", "Bobo", "Bollera", "Boluda", "Boludez", "Boludo", "Borracha", 
-    "Borrachaza", "Borrachazo", "Borrachera", "Borracho", "Borrachuza", "Borrachuzo", "Bronca", "Bufón", "Bufona", 
-    "Bujarra", "Bujarrilla", "Bujarrón", "Cabreada", "Cabreado", "Cabrear", "Cabreo", "Cabrón", "Cabrona", 
-    "Cabronada", "Cabroncete", "Caca", "Cachonda", "Cachondeo", "Cachondo", "Cagada", "Cagado", "Cagar", "Cagarla", 
-    "Cagarse", "Cagoen", "Cagón", "Cagona", "Calentorra", "Calentorro", "Calzonazo", "Calzonazos", "Camero", 
-    "Capulla", "Capullo", "Carajo", "Carajota", "Carajote", "Carallo", "Carnudo", "Cascar", "Cascarla", "Casquete", 
-    "Cateta", "Cateto", "Cazurra", "Cazurro", "Cencular", "Cenutrio", "Cepillar", "Ceporra", "Ceporro", "Chapero", 
-    "Chaquetera", "Chaquetero", "Chichi", "Chingada", "Chingar", "Chivata", "Chivato", "Chocho", "Chochona", 
-    "Choriza", "Chorizo", "Chorra", "Chorrada", "Chorva", "Chula", "Chulilla", "Chulillo", "Chulita", "Chulito", 
-    "Chulo", "Chuloputas", "Chumino", "Chúpame", "Chúpamela", "Chupópteros", "Churra", "Churrita", "Chutarse", 
-    "Chute", "Cipote", "Cipotón", "Cojón", "Cojones", "Cojonudo", "Comemierda", "Comino", "Coño", "Cornuda", 
-    "Cornudo", "Correrse", "Corrida", "Corrupta", "Corrupto", "Cretina", "Cretino", "Cuerno", "Cuesco", "Culear", 
-    "Culero", "Cutre", "Decapitar", "Decojones", "Degollar", "Descojonarse", "Descojone", "Descojono", 
-    "Desequilibrada", "Desequilibrado", "Desgraciada", "Desgraciado", "Déspota", "Dictatorial", "Doctorcilla", 
-    "Doctorcillo", "Doctorcita", "Doctorcito", "Drogata", "Embustera", "Embustero", "Encabronar", "Encubrimiento", 
-    "Enganchada", "Enganchado", "Engañabobos", "Engaño", "Enmascaramiento", "Enmascarar", "Envenenar", "Escocida", 
-    "Escocido", "Estafa", "Estafador", "Estafadora", "Estúpida", "Estúpido", "Facha", "Falo", "Farsante", "Folla", 
-    "Follada", "Follado", "Follador", "Folladora", "Follamos", "Follando", "Follar", "Follarse", "Follo", "Follón", 
-    "Follones", "Friki", "Frustrada", "Frustrado", "Fulanita", "Fulanito", "Fulano", "Furcia", "Gallorda",    "Gamberra", "Gamberro", "Gañán", "Gili", "Gilipolla", "Gilipollas", "Gilipuertas", "Gitaneo", "Granuja", 
-    "Greñudo", "Guarra", "Guarrita", "Guarrito", "Guarro", "Guay", "Hijadeputa", "Hijaputa", "Hijodeputa", 
-    "Hijoputa", "Hipócrita", "Hostia", "Huevo", "Huevón", "Huevona", "Idiota", "Ignorante", "Imbécil", 
-    "Impresentable", "Jiñar", "Jiñarse", "Joder", "Ladrona", "Lameculo", "Litrona", "Loca", "Loco", 
-    "Loquera", "Loquero", "Machacarla", "Machorra", "Mafia", "Mafiosa", "Mafioso", "Majadera", "Majadero", 
-    "Malafolla", "Malfolla", "Malfollada", "Malfollado", "Malnacida", "Malnacido", "Malparida", "Malparido", 
-    "Mamada", "Mámamela", "Mamarla", "Mamarracha", "Mamarracho", "Mameluco", "Mamón", "Mamona", "Mamporrero", 
-    "Mangante", "Marica", "Maricón", "Maricona", "Mariconazo", "Marimacha", "Marimacho", "Mariposón", "Masacre", 
-    "Matanza", "Matar", "Matasanos", "Mato", "Matón", "Mear", "Mecorro", "Medicucha", "Medicucho", "Mediquilla", 
-    "Mediquillo", "Mejiño", "Melapelan", "Memeo", "Mentecata", "Mentecato", "Mentirosa", "Mentiroso", "Mierda", 
-    "Minga", "Miserable", "Mocosa", "Mocoso", "Mogollón", "Mojigata", "Mojigato", "Mojino", "Mojón", "Moña", 
-    "Morralla", "Mugra", "Mugriente", "Mugrosa", "Mugroso", "Nabo", "Nalgas", "Negligencia", "Negligente", 
-    "Negrata", "Negrera", "Negrero", "Opresor", "Opresora", "Paja", "Pajera", "Pajero", "Pajillera", "Pajillero", 
-    "Palurda", "Palurdo", "Pamplina", "Panoli", "Papanatas", "Pasota", "Payasa", "Payaso", "Pécora", "Pedo", 
-    "Pedorra", "Pedorro", "Pelandrusca", "Pelandrusco", "Pendeja", "Pendejo", "Peo", "Perras", "Perversa", 
-    "Perverso", "Pesetera", "Pesetero", "Peta", "Petarda", "Petardo", "Picha", "Pichafloja", "Pija", "Pijar", 
-    "Pijo", "Pijotera", "Pijotero", "Pilila", "Pinga", "Piojosa", "Piojoso", "Pipote", "Pirada", "Pirado", "Polla", 
-    "Pollada", "Pollón", "Porcojones", "Porculo", "Porelculo", "Porrera", "Porrero", "Porro", "Pringada", 
-    "Pringado", "Proxeneta", "Puerca", "Puerco", "Puñeta", "Puñetera", "Puñetero", "Puta", "Putada", "Putero", 
-    "Putilla", "Putillo", "Putita", "Putito", "Puto", "Putón", "Putona", "Queosjodan", "Querella", "Rabo", 
-    "Ramera", "Ramero", "Ratera", "Ratero", "Reinona", "Reputa", "Roña", "Roñosa", "Roñoso", "Sabandija", 
-    "Sangráis", "Sangrantes", "Sarasa", "Sarna", "Sarnosa", "Sarnoso", "Sinvergüenza", "Soplaflautas", 
-    "Soplapollas", "Subidón", "Subnormal", "Sudaca", "Tarada", "Tarado", "Taruga", "Tarugo", "Teta", "Tete", 
-    "Tocacojones", "Tocapelotas", "Tonta", "Tonto", "Torpe", "Tortillera", "Toto", "Tragapollas", "Zangano", 
-    "Zopenca", "Zopenco", "Zorra", "Tragasables", "Trapicheo", "Truño", "Tusmuertos", "Usurera", "Usurero", 
-    "Vividor", "Vividora", "Yoya", "Zangana", "Zorrilla", "Zorro", "Zorrón", "Zorrona", "Zurullo"
-]
 
-
-
-caja_texto = None  # Define caja_texto como una variable global y asigna None
-
+caja_texto = None  
 tabla = None  # Define tabla como una variable global y asigna None
 
 # Diccionario de mapeo de etiquetas gramaticales
@@ -87,7 +37,8 @@ mapeo_etiquetas_espanol_ingles = {
 atributos_predefinidos = ["Número de palabras", "Numero de frases", "Sustantivos", "Sustantivos propios",
                            "Conjunciones de coordinación", "Preposiciones", "Adjetivos",
                            "Verbos", "Adverbios", "Pronombres", "Determinantes",
-                           "Puntuación", "Números", "Interjecciones", "Conjunciones subordinadas"]
+                           "Puntuación", "Números", "Interjecciones", "Conjunciones subordinadas", "Palabras malsonantes",
+                           "Negaciones", "Palabras por frase"]
 
 def contar_palabras_texto(texto):
     tokens = [token for token in word_tokenize(texto) if re.match(r'^\w+$', token)]
@@ -114,9 +65,12 @@ def obtener_valores_atributos(texto):
     conteo_oraciones = contar_oraciones(texto)
     etiquetas_gramaticales = etiquetar_gramaticalmente_texto(texto)
     palabras_malsonantes_detectadas = detectar_palabras_malsonantes(texto)
+    palabras_negativas_detectadas = detectar_negaciones(texto)
+    palabras_por_frase = contar_palabras_por_frase(texto)
     valores_atributos = {
         "Número de palabras": conteo_palabras,
-        "Número de frases": conteo_oraciones,  
+        "Número de frases": conteo_oraciones,
+        "Palabras por frase": palabras_por_frase,
         "Sustantivos": etiquetas_gramaticales.get("NN", 0),
         "Sustantivos propios": etiquetas_gramaticales.get("NNP", 0),
         "Conjunciones de coordinación": etiquetas_gramaticales.get("CC", 0),
@@ -130,9 +84,11 @@ def obtener_valores_atributos(texto):
         "Números": etiquetas_gramaticales.get("CD", 0),
         "Interjecciones": etiquetas_gramaticales.get("UH", 0),
         "Conjunciones subordinadas": etiquetas_gramaticales.get("IN", 0),
-        "Palabras malsonantes": len(palabras_malsonantes_detectadas)
+        "Palabras malsonantes": len(palabras_malsonantes_detectadas),
+        "Negaciones": palabras_negativas_detectadas  # Elimina len() aquí
     }
     return valores_atributos
+
 
 def analizar_texto():
     texto = caja_texto.get("1.0", "end-1c")
@@ -144,36 +100,71 @@ def analizar_texto():
 def detectar_palabras_malsonantes(texto):
     # Convertir el texto a minúsculas
     texto_minusculas = texto.lower()
-    
     # Convertir las palabras malsonantes a minúsculas
     palabras_malsonantes_minusculas = [palabra.lower() for palabra in palabras_malsonantes]
-    
     # Tokenizar el texto en palabras
     tokens = word_tokenize(texto_minusculas)
-    
     # Buscar palabras malsonantes en el texto
     palabras_malsonantes_detectadas = [palabra for palabra in tokens if palabra in palabras_malsonantes_minusculas]
-    
     return palabras_malsonantes_detectadas
+
+def detectar_negaciones(texto):
+    # Convertir el texto a minúsculas
+    texto_minusculas = texto.lower()
+    # Convertir las negaciones a minúsculas
+    negaciones_minusculas = [negacion.lower() for negacion in negaciones]
+    # Tokenizar el texto en frases
+    frases = sent_tokenize(texto_minusculas)
+    # Contador de negaciones
+    contador_negaciones = 0
+    # Iterar sobre cada frase
+    for frase in frases:
+        # Tokenizar la frase en palabras
+        tokens = word_tokenize(frase)
+        # Buscar negaciones en la frase
+        for negacion in negaciones_minusculas:
+            if negacion in tokens:
+                # Si se encuentra una negación en la frase, sumar 1 al contador y salir del bucle
+                contador_negaciones += 1
+                break  # Salir del bucle interno
+    return contador_negaciones
+
+def contar_palabras_por_frase(texto):
+    # Utiliza sent_tokenize para dividir el texto en oraciones
+    oraciones = sent_tokenize(texto)
+    
+    # Crea una lista para almacenar el número de palabras por frase
+    num_palabras_por_frase = []
+    
+    # Itera sobre cada frase y cuenta las palabras
+    for frase in oraciones:
+        palabras_en_frase = len([token for token in word_tokenize(frase) if re.match(r'^\w+$', token)])
+        num_palabras_por_frase.append(palabras_en_frase)
+    
+    return num_palabras_por_frase
+
 
 
 def limpiar_tabla():
     for item in tabla.get_children():
         tabla.delete(item)
 
+from tkinter import Text, Button, ttk, Tk, LEFT, RIGHT, CENTER
+
 def crear_interfaz_texto(ventana):
     global caja_texto, boton_analizar, boton_limpiar_busqueda, tabla
+
     # Caja de texto
-    caja_texto = Text(ventana, height=10, width=50)
-    caja_texto.pack()
+    caja_texto = Text(ventana, height=20, width=50)
+    caja_texto.grid(row=0, column=0, padx=10, pady=10, rowspan=2)  # Se extiende desde la fila 0 hasta la 1 y columna 0
 
     # Botón para analizar texto
     boton_analizar = Button(ventana, text="Analizar Texto", command=analizar_texto)
-    boton_analizar.pack()
+    boton_analizar.grid(row=0, column=1, padx=10, pady=10, sticky="ew")  # Se encuentra en la fila 0 y columna 1
 
     # Botón para limpiar la búsqueda
     boton_limpiar_busqueda = Button(ventana, text="Limpiar Búsqueda", command=limpiar_tabla)
-    boton_limpiar_busqueda.pack()
+    boton_limpiar_busqueda.grid(row=1, column=1, padx=10, pady=10, sticky="ew")  # Se encuentra en la fila 1 y columna 1
 
     # Creamos el Treeview para mostrar la tabla
     tabla = ttk.Treeview(ventana)
@@ -183,12 +174,11 @@ def crear_interfaz_texto(ventana):
     tabla.column("Valor", anchor=tk.CENTER, width=200)  # Alineación al centro
     tabla.heading("Atributo", text="Atributo")
     tabla.heading("Valor", text="Valor")
-    tabla.pack()
+    tabla.grid(row=0, column=2, padx=10, pady=10, rowspan=2)  # Se extiende desde la fila 0 hasta la 1 y columna 2
 
     # Insertar atributos predefinidos en la tabla
     for atributo in atributos_predefinidos:
         tabla.insert("", "end", values=(atributo, ""))
-
 
 # Llamada a la función para crear la interfaz
 if __name__ == "__main__":

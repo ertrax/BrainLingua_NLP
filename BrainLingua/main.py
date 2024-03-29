@@ -7,6 +7,7 @@ from styles import configurar_estilos
 def main():
     ventana = tk.Tk()
     ventana.title("BrainLingua NLP")
+    ventana.iconbitmap("img/brain.ico")
 
     # Configuración de la ventana y la barra de menú
     configurar_estilos()
